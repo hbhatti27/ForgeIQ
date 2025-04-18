@@ -1,0 +1,118 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  createdAt      DateTime        @default(now())
+  age            Int
+  gender         String
+  height         Int // in inches
+  weight         Int // in pounds
+  trainingDays   Int
+  calories       Int
+  protein        Int
+  carbs          Int
+  fats           Int
+  dietType       String?        // e.g., "keto", "vegetarian", "balanced"
+  allergies      String[]       // list of restricted foods like "dairy", "gluten"
+
+  trainingPlan   TrainingPlan?
+  workoutLogs    WorkoutLog[]
+  customWorkouts CustomWorkout[]
+  trainingLogs   TrainingLog[]
+  checkIns       CheckIn[]
+  nutritionLogs  NutritionLog[]
+  mealPlans      MealPlan[]     // Added relation to MealPlan
+  chatHistory     ChatHistory?   // Added relation to ChatHistory
+}
+
+model TrainingPlan {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  weakPoints    String
+  dailySchedule Json
+  user          User     @relation(fields: [userId], references: [id])
+}
+
+model WorkoutLog {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @default(now())
+  content   Json
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model CustomWorkout {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  exercises Json
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model TrainingLog {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @default(now())
+  dayIndex  Int
+  exercises Json
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model CheckIn {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @default(now())
+  frontUrl  String
+  sideUrl   String
+  backUrl   String
+  ebf       Float
+  elbm      Float
+
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model NutritionLog {
+  id        String   @id @default(cuid())
+  userId    String
+  date      DateTime @default(now())
+  calories  Int
+  protein   Int
+  carbs     Int
+  fats      Int
+
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model MealPlan {
+  id         String   @id @default(cuid())
+  userId     String
+  calories   Int
+  protein    Int
+  carbs      Int
+  fats       Int
+  dietType   String?
+  allergies  String[]
+  data       Json
+  createdAt  DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id]) // Added relation back to User
+}
+
+model ChatHistory {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  messages  Json
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id])
+}
