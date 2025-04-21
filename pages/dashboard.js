@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { Line } from 'react-chartjs-2';
 import {
@@ -280,13 +281,13 @@ export default function Dashboard() {
               <h2 className="text-xl font-semibold text-orange-400 mb-2">Latest Check-In</h2>
               <div className="flex justify-center space-x-2 mb-4">
                 {latestFrontPhoto && (
-                  <img src={latestFrontPhoto} alt="Latest Front" className="w-1/4 rounded border border-gray-600" />
+                  <Image src={latestFrontPhoto} alt="Latest Front" width={300} height={300} className="w-1/4 rounded border border-gray-600" />
                 )}
                 {latestSidePhoto ? (
-                  <img src={latestSidePhoto} alt="Latest Side" className="w-1/4 rounded border border-gray-600" />
+                  <Image src={latestSidePhoto} alt="Latest Side" width={300} height={300} className="w-1/4 rounded border border-gray-600" />
                 ) : null}
                 {latestBackPhoto ? (
-                  <img src={latestBackPhoto} alt="Latest Back" className="w-1/4 rounded border border-gray-600" />
+                  <Image src={latestBackPhoto} alt="Latest Back" width={300} height={300} className="w-1/4 rounded border border-gray-600" />
                 ) : null}
               </div>
               <p>Estimated Body Fat %: <span className="font-bold">{bodyFat}</span></p>
@@ -439,40 +440,41 @@ export default function Dashboard() {
                     </div>
                   )}
                   {checkinHistory.slice(0, -1).map((entry, index) => (
-                  <div key={index} className="bg-zinc-800 p-4 rounded-md shadow flex flex-col lg:flex-row lg:items-start space-y-4 lg:space-y-0 lg:space-x-6">
-                    <div className="flex space-x-2">
-                      {entry.frontPhotoUrl && (
-                        <img src={entry.frontPhotoUrl} alt={`Front Check-in ${index}`} className="w-1/4 rounded border border-gray-600" />
-                      )}
-                      {entry.sidePhotoUrl && (
-                        <img src={entry.sidePhotoUrl} alt={`Side Check-in ${index}`} className="w-1/4 rounded border border-gray-600" />
-                      )}
-                      {entry.backPhotoUrl && (
-                        <img src={entry.backPhotoUrl} alt={`Back Check-in ${index}`} className="w-1/4 rounded border border-gray-600" />
-                      )}
+                    <div key={index} className="bg-zinc-800 p-4 rounded-md shadow flex flex-col lg:flex-row lg:items-start space-y-4 lg:space-y-0 lg:space-x-6">
+                      <div className="flex space-x-2">
+                        {entry.frontPhotoUrl && (
+                          <Image src={entry.frontPhotoUrl} alt={`Front Check-in ${index}`} width={300} height={300} className="w-1/4 rounded border border-gray-600" />
+                        )}
+                        {entry.sidePhotoUrl && (
+                          <Image src={entry.sidePhotoUrl} alt={`Side Check-in ${index}`} width={300} height={300} className="w-1/4 rounded border border-gray-600" />
+                        )}
+                        {entry.backPhotoUrl && (
+                          <Image src={entry.backPhotoUrl} alt={`Back Check-in ${index}`} width={300} height={300} className="w-1/4 rounded border border-gray-600" />
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-400 mb-2">{new Date(entry.date).toLocaleDateString()}</p>
+                        <table className="text-sm w-full text-left border-collapse">
+                          <tbody>
+                            <tr>
+                              <td className="pr-4 text-orange-400 font-semibold">Estimated Body Fat %:</td>
+                              <td>{entry.bodyFat}</td>
+                            </tr>
+                            <tr>
+                              <td className="pr-4 text-orange-400 font-semibold">Estimated Lean Body Mass:</td>
+                              <td>{entry.leanBodyMass} lbs</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-400 mb-2">{new Date(entry.date).toLocaleDateString()}</p>
-                      <table className="text-sm w-full text-left border-collapse">
-                        <tbody>
-                          <tr>
-                            <td className="pr-4 text-orange-400 font-semibold">Estimated Body Fat %:</td>
-                            <td>{entry.bodyFat}</td>
-                          </tr>
-                          <tr>
-                            <td className="pr-4 text-orange-400 font-semibold">Estimated Lean Body Mass:</td>
-                            <td>{entry.leanBodyMass} lbs</td>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                ))
+                  ))}
+                </>
               )}
             </div>
-          </div>
-        );
-
+                </div>
+              </div>
+            );
       case 'nutrition':
         return (
           <div className="mt-6 text-gray-300">
@@ -1244,6 +1246,3 @@ export default function Dashboard() {
 
       {renderTabContent()}
     </div>
-        );
-        return null;
-      }
