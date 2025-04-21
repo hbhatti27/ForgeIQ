@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { Line } from 'react-chartjs-2';
@@ -1187,64 +1187,64 @@ export default function Dashboard() {
       <h1 className="text-4xl font-bold text-orange-500 mb-6">Welcome to Your Dashboard</h1>
 
       <div className="flex space-x-4 border-b border-zinc-700 pb-2">
-        <button
-          className={`pb-2 px-3 font-semibold ${activeTab === 'home' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
-          onClick={() => setActiveTab('home')}
-        >
-          Home
-        </button>
-        <button
-          className={`pb-2 px-3 font-semibold ${activeTab === 'checkins' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
-          onClick={() => setActiveTab('checkins')}
-        >
-          Check-ins
-        </button>
-        <button
-          className={`pb-2 px-3 font-semibold ${activeTab === 'nutrition' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
-          onClick={() => setActiveTab('nutrition')}
-        >
-          Nutrition Summary
-        </button>
-        <button
-          className={`pb-2 px-3 font-semibold ${activeTab === 'mealplan' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
-          onClick={() => setActiveTab('mealplan')}
-        >
-          Meal Plan
-        </button>
-        <button
-          className={`pb-2 px-3 font-semibold ${activeTab === 'training' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
-          onClick={() => setActiveTab('training')}
-        >
-          Training
-        </button>
-        <button
-          className={`pb-2 px-3 font-semibold ${activeTab === 'coach' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
-          onClick={() => setActiveTab('coach')}
-        >
-          AI Coach
-        </button>
-        <button
-          className={`pb-2 px-3 font-semibold ${activeTab === 'anabolic' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
-          onClick={() => setActiveTab('anabolic')}
-        >
-          Anabolic Consulting
-        </button>
-        {isAdmin && (
-          <>
+        <>
+          <button
+            className={`pb-2 px-3 font-semibold ${activeTab === 'home' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => setActiveTab('home')}
+          >
+            Home
+          </button>
+          <button
+            className={`pb-2 px-3 font-semibold ${activeTab === 'checkins' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => setActiveTab('checkins')}
+          >
+            Check-ins
+          </button>
+          <button
+            className={`pb-2 px-3 font-semibold ${activeTab === 'nutrition' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => setActiveTab('nutrition')}
+          >
+            Nutrition Summary
+          </button>
+          <button
+            className={`pb-2 px-3 font-semibold ${activeTab === 'mealplan' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => setActiveTab('mealplan')}
+          >
+            Meal Plan
+          </button>
+          <button
+            className={`pb-2 px-3 font-semibold ${activeTab === 'training' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => setActiveTab('training')}
+          >
+            Training
+          </button>
+          <button
+            className={`pb-2 px-3 font-semibold ${activeTab === 'coach' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => setActiveTab('coach')}
+          >
+            AI Coach
+          </button>
+          <button
+            className={`pb-2 px-3 font-semibold ${activeTab === 'anabolic' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => setActiveTab('anabolic')}
+          >
+            Anabolic Consulting
+          </button>
+          {isAdmin && (
             <button
               className={`pb-2 px-3 font-semibold ${activeTab === 'adminconsult' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
               onClick={() => setActiveTab('adminconsult')}
             >
               Admin Consult
             </button>
-          </>
-        )}
-        <button
-          className={`pb-2 px-3 font-semibold ${activeTab === 'history' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
-          onClick={() => setActiveTab('history')}
-        >
-          Training History
-        </button>
+          )}
+          <button
+            className={`pb-2 px-3 font-semibold ${activeTab === 'history' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => setActiveTab('history')}
+          >
+            Training History
+          </button>
+        </>
       </div>
 
       {renderTabContent()}
