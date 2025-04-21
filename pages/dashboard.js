@@ -1236,7 +1236,7 @@ export default function Dashboard() {
         >
           Admin Consult
         </button>
-      )}
+        )}
         <button
           className={`pb-2 px-3 font-semibold ${activeTab === 'history' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
           onClick={() => setActiveTab('history')}
