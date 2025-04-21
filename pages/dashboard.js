@@ -1187,7 +1187,7 @@ export default function Dashboard() {
       <h1 className="text-4xl font-bold text-orange-500 mb-6">Welcome to Your Dashboard</h1>
 
       <div className="flex space-x-4 border-b border-zinc-700 pb-2">
-        <>
+        <React.Fragment>
           <button
             className={`pb-2 px-3 font-semibold ${activeTab === 'home' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
             onClick={() => setActiveTab('home')}
@@ -1244,7 +1244,7 @@ export default function Dashboard() {
           >
             Training History
           </button>
-        </>
+        </React.Fragment>
       </div>
 
       {renderTabContent()}
