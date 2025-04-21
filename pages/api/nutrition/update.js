@@ -59,10 +59,41 @@ export default async function handler(req, res) {
       adjustmentNote = 'Increased training output, maintaining macros';
     }
 
-    // Recalculate macros
-    const protein = Math.floor(calories * 0.3 / 4);
-    let carbs = Math.floor(calories * 0.4 / 4);
-    const fats = Math.floor(calories * 0.3 / 9);
+    // Fetch user goal and latest check-in
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    const latestCheckin = await prisma.checkIn.findFirst({
+      where: { userId },
+      orderBy: { date: 'desc' },
+    });
+
+    const currentWeight = latestCheckin
+      ? parseFloat(latestCheckin.leanBodyMass) / (1 - parseFloat(latestCheckin.bodyFat) / 100)
+      : null;
+    const goal = user?.goalWeight ? parseFloat(user.goalWeight) : null;
+
+    let phase = 'recomp';
+    if (goal && currentWeight) {
+      if (currentWeight > goal + 2) phase = 'cutting';
+      else if (currentWeight < goal - 2) phase = 'bulking';
+    }
+
+    // Phase-specific fat ratio
+    let fatRatio = 0.3;
+    if (phase === 'bulking') {
+      fatRatio = 0.25;
+    }
+
+    // Protein: 1g per lb of goal weight
+    const protein = goal ? Math.floor(goal) : Math.floor(calories * 0.3 / 4);
+
+    // Fat (from phase-specific fat ratio)
+    const fats = Math.floor(calories * fatRatio / 9);
+
+    // Calculate remaining calories for carbs
+    const proteinCals = protein * 4;
+    const fatCals = fats * 9;
+    const remainingCals = calories - proteinCals - fatCals;
+    let carbs = Math.floor(remainingCals / 4);
 
     // If volume dropped, bump carbs slightly
     if (adjustmentNote.includes('increased calories')) {

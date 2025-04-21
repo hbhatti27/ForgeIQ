@@ -65,10 +65,24 @@ export default function Signup() {
       </div>
       <div className="flex justify-center mb-4">
         <button
-          onClick={() => {
-            // Placeholder: Replace with real authentication check
-            console.log('✅ Log In button clicked. Redirecting to dashboard...');
-            window.location.href = '/dashboard';
+          onClick={async () => {
+            try {
+              const res = await fetch('/api/user/role', {
+                headers: {
+                  'x-user-email': localStorage.getItem('userEmail') || '',
+                }
+              });
+              const data = await res.json();
+ 
+              if (data.role === 'admin' || data.role === 'premium' || data.role === 'basic') {
+                window.location.href = '/dashboard';
+              } else {
+                alert('Access denied. Please complete your registration or sign up first.');
+              }
+            } catch (err) {
+              console.error('Login check failed:', err);
+              alert('Unable to verify login. Please try again.');
+            }
           }}
           className="bg-zinc-700 hover:bg-zinc-600 text-white px-4 py-2 rounded-full text-sm font-semibold transition-colors"
         >

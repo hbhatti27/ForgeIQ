@@ -20,11 +20,10 @@ export default function WelcomeLogin() {
               alt="ForgeIQ Logo"
               className="w-full h-full object-contain relative z-10"
             />
-<div
-className="absolute inset-0 bg-gradient-to-r from-pink-500 via-yellow-500 to-blue-500 animate-shimmer"
-style={{ backgroundSize: '1000px 100%' }}
-/>
-         </div>
+            <div
+              className="absolute inset-0 rounded-full border-4 border-orange-500 bg-gradient-to-r from-orange-400 via-yellow-500 to-red-500 opacity-70 animate-ping"
+            />
+          </div>
           <h1 className="text-2xl text-orange-500 font-bold tracking-wide">
             Welcome to ForgeIQ. The Next Evolution in Fitness.
           </h1>

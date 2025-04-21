@@ -10,8 +10,11 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
+import { withServerSideAuth } from '@clerk/nextjs/ssr';
 
 ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend);
+
+export const getServerSideProps = withServerSideAuth();
 
 export default function Dashboard() {
   const [goalWeight, setGoalWeight] = useState(null);
@@ -185,7 +188,44 @@ export default function Dashboard() {
     if (currentWeight < goal - 2) return 'bulking';
     return 'recomp';
   };
-  const [premiumUser, setPremiumUser] = useState(true); // Replace with real subscription check
+  const [premiumUser, setPremiumUser] = useState(false);
+  const [anabolicQuestion, setAnabolicQuestion] = useState('');
+  const [consultHistory, setConsultHistory] = useState([]);
+  const [allConsults, setAllConsults] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  useEffect(() => {
+    const checkUserRole = async () => {
+      const res = await fetch('/api/user/role');
+      if (res.ok) {
+        const data = await res.json();
+        setPremiumUser(data.role === 'premium');
+        setIsAdmin(data.role === 'admin');
+      }
+    };
+    checkUserRole();
+  }, []);
+
+  useEffect(() => {
+    const loadConsultMessages = async () => {
+      const res = await fetch('/api/consult/history?userId=user-123');
+      if (res.ok) {
+        const data = await res.json();
+        setConsultHistory(data.messages);
+      }
+    };
+    loadConsultMessages();
+  }, []);
+
+  useEffect(() => {
+    const fetchAllConsults = async () => {
+      const res = await fetch('/api/consult/all');
+      if (res.ok) {
+        const data = await res.json();
+        setAllConsults(data.messages || []);
+      }
+    };
+    fetchAllConsults();
+  }, []);
   const [chatMessages, setChatMessages] = useState([]);
   useEffect(() => {
     const loadChatHistory = async () => {
@@ -361,7 +401,44 @@ export default function Dashboard() {
               {checkinHistory.length === 0 ? (
                 <p className="text-gray-400">No check-ins yet.</p>
               ) : (
-                checkinHistory.slice(0, -1).map((entry, index) => (
+                <>
+                  {checkinHistory.length > 1 && (
+                    <div className="bg-zinc-900 p-4 rounded-md shadow-md mb-6">
+                      <h3 className="text-lg font-semibold text-orange-400 mb-2">Progress Overview</h3>
+                      <Line
+                        data={{
+                          labels: checkinHistory.map((entry, i) => `W${checkinHistory.length - i}`),
+                          datasets: [
+                            {
+                              label: 'Body Fat %',
+                              data: checkinHistory.map((c) => parseFloat(c.bodyFat)),
+                              borderColor: '#f87171',
+                              backgroundColor: 'rgba(248, 113, 113, 0.2)',
+                              tension: 0.3
+                            },
+                            {
+                              label: 'Lean Body Mass (lbs)',
+                              data: checkinHistory.map((c) => parseFloat(c.leanBodyMass)),
+                              borderColor: '#34d399',
+                              backgroundColor: 'rgba(52, 211, 153, 0.2)',
+                              tension: 0.3
+                            }
+                          ]
+                        }}
+                        options={{
+                          responsive: true,
+                          plugins: {
+                            legend: { labels: { color: 'white' } }
+                          },
+                          scales: {
+                            x: { ticks: { color: 'white' } },
+                            y: { ticks: { color: 'white' } }
+                          }
+                        }}
+                      />
+                    </div>
+                  )}
+                  {checkinHistory.slice(0, -1).map((entry, index) => (
                   <div key={index} className="bg-zinc-800 p-4 rounded-md shadow flex flex-col lg:flex-row lg:items-start space-y-4 lg:space-y-0 lg:space-x-6">
                     <div className="flex space-x-2">
                       {entry.frontPhotoUrl && (
@@ -428,17 +505,17 @@ export default function Dashboard() {
                     <>
                       {phase === 'cutting' && (
                         <p className="text-sm text-gray-400 mt-4">
-                          🔥 You're in a fat loss phase. Stick to your deficit and prioritize high protein to preserve lean mass.
+                          🔥 You&apos;re in a fat loss phase. Stick to your deficit and prioritize high protein to preserve lean mass.
                         </p>
                       )}
                       {phase === 'bulking' && (
                         <p className="text-sm text-gray-400 mt-4">
-                          📈 You're in a growth phase. Your current macros support lean muscle gain. Stay consistent with training intensity.
+                          📈 You&apos;re in a growth phase. Your current macros support lean muscle gain. Stay consistent with training intensity.
                         </p>
                       )}
                       {phase === 'recomp' && (
                         <p className="text-sm text-gray-400 mt-4">
-                          ⚖️ You're close to your goal weight — maintain a balanced intake while fine-tuning your body composition.
+                          ⚖️ You&apos;re close to your goal weight — maintain a balanced intake while fine-tuning your body composition.
                         </p>
                       )}
                     </>
@@ -466,55 +543,11 @@ export default function Dashboard() {
                 >
                   <option value="">Select a date</option>
                   {savedMealPlans.map((plan, i) => (
-                    <div key={plan.id} className="flex justify-between items-center text-sm mb-1">
-                      <option key={plan.id} value={plan.id}>
-                        {plan.isFavorite ? '⭐ ' : ''}
-                        {plan.name ? `${plan.name} (${new Date(plan.createdAt).toLocaleDateString()})` : new Date(plan.createdAt).toLocaleDateString()}
-                        {i === 0 ? ' (Active)' : ' (Historical)'}
-                      </option>
-                      <button
-                        className={`ml-3 text-sm ${plan.isFavorite ? 'text-yellow-400' : 'text-gray-500'} hover:text-yellow-300`}
-                        onClick={async () => {
-                          const res = await fetch('/api/mealplan/favorite', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ id: plan.id, isFavorite: !plan.isFavorite })
-                          });
-                          if (res.ok) {
-                            const refreshed = await fetch('/api/mealplan/list?userId=user-123');
-                            if (refreshed.ok) {
-                              const data = await refreshed.json();
-                              const sorted = data.plans.sort((a, b) => {
-                                if (a.isFavorite === b.isFavorite) {
-                                  return new Date(b.createdAt) - new Date(a.createdAt);
-                                }
-                                return b.isFavorite - a.isFavorite;
-                              });
-                              setSavedMealPlans(sorted);
-                            }
-                          }
-                        }}
-                      >
-                        {plan.isFavorite ? '★' : '☆'}
-                      </button>
-                      {i !== 0 && (
-                        <button
-                          onClick={async () => {
-                            if (confirm('Are you sure you want to delete this meal plan?')) {
-                              const res = await fetch(`/api/mealplan/delete?id=${plan.id}`, { method: 'DELETE' });
-                              if (res.ok) {
-                                setSavedMealPlans((prev) => prev.filter((p) => p.id !== plan.id));
-                              } else {
-                                alert('Failed to delete plan.');
-                              }
-                            }
-                          }}
-                          className="text-red-400 hover:text-red-600 ml-2"
-                        >
-                          🗑
-                        </button>
-                      )}
-                    </div>
+                    <option key={plan.id} value={plan.id}>
+                      {plan.isFavorite ? '⭐ ' : ''}
+                      {plan.name ? `${plan.name} (${new Date(plan.createdAt).toLocaleDateString()})` : new Date(plan.createdAt).toLocaleDateString()}
+                      {i === 0 ? ' (Active)' : ' (Historical)'}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -605,14 +638,12 @@ export default function Dashboard() {
           </div>
         );
 
-      case 'training':
+      case 'training': {
         const isRestDay = parseInt(trainingDays) === 0;
         const workoutToDisplay = JSON.parse(localStorage.getItem('activeCustomWorkout')) || todayWorkout;
-        
         return (
           <div className="mt-6">
             <h2 className="text-2xl font-bold text-orange-400 mb-4">Training</h2>
- 
             <div className="flex justify-end mb-6 space-x-4">
               <button
                 className="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md font-semibold text-white"
@@ -808,7 +839,6 @@ export default function Dashboard() {
                 ))}
               </div>
             )}
-
             {isRestDay ? (
               <div className="bg-zinc-800 p-6 rounded-lg text-gray-300">
                 <p className="mb-2">Today is a scheduled rest day.</p>
@@ -820,12 +850,11 @@ export default function Dashboard() {
                 </ul>
               </div>
             ) : (
-                <>
+              <>
                 <div className="bg-zinc-900 p-4 rounded-lg text-sm text-gray-300 mb-6">
                   <h3 className="text-orange-400 font-semibold mb-2">Pre-Workout Guidance</h3>
                   <p>At the start of your workout, perform 1–2 warm-up sets at 50–75% of your working weight for your first main exercise. This prepares your body and joints for the working sets ahead.</p>
                 </div>
- 
                 <div className="space-y-6">
                   {(workoutToDisplay?.exercises || []).map((exercise, i) => (
                     <div key={i} className="bg-zinc-800 p-4 rounded-md shadow text-white">
@@ -836,7 +865,7 @@ export default function Dashboard() {
                       <div className="mb-4">
                         <div className="bg-zinc-900 p-3 rounded-md border border-zinc-700">
                           <p className="text-gray-400 text-sm italic mb-1">
-                            Want to learn how to do "{exercise.name}"?
+                            Want to learn how to do &quot;{exercise.name}&quot;?
                           </p>
                           <input
                             type="text"
@@ -894,37 +923,30 @@ export default function Dashboard() {
                       const userId = 'user-123';
                       const dayIndex = todayQueueIndex;
                       const exerciseData = [];
-
                       // Grab all exercise cards
                       const cards = document.querySelectorAll('.bg-zinc-800.shadow');
-
                       cards.forEach((card) => {
                         const name = card.querySelector('h4')?.textContent || '';
                         const weights = Array.from(card.querySelectorAll('input[placeholder="Weight (lbs)"]')).map(input => parseFloat(input.value));
                         const reps = Array.from(card.querySelectorAll('input[placeholder="Reps"]')).map(input => parseInt(input.value));
-                        
                         const sets = weights.map((w, i) => ({
                           weight: w || 0,
                           reps: reps[i] || 0,
                         }));
-
                         exerciseData.push({ name, sets });
                       });
-
                       // Save to backend
-                      await fetch('/api/training/log', {
+                      await fetch('/api/training/logs', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ userId, dayIndex, exercises: exerciseData }),
                       });
-
                       // Advance workout queue
                       const advanceRes = await fetch('/api/training/advance', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ userId }),
                       });
-
                       if (advanceRes.ok) {
                         const todayRes = await fetch(`/api/training/today?userId=${userId}`);
                         const todayData = await todayRes.json();
@@ -942,6 +964,7 @@ export default function Dashboard() {
             )}
           </div>
         );
+      }
 
       case 'coach':
           if (!premiumUser) {
@@ -983,6 +1006,60 @@ export default function Dashboard() {
               </div>
             </div>
           );
+ 
+      case 'anabolic':
+        if (!premiumUser) {
+          return (
+            <div className="mt-6 text-white">
+              <h2 className="text-2xl font-bold text-orange-400 mb-4">Anabolic Consulting</h2>
+              <p className="text-gray-400">This feature is available to Premium users only.</p>
+            </div>
+          );
+        }
+        return (
+          <div className="mt-6 text-white">
+            <h2 className="text-2xl font-bold text-orange-400 mb-4">Anabolic Consulting</h2>
+            <p className="text-sm text-gray-300 mb-4">
+              Ask your direct question here. This message will be forwarded to the ForgeIQ medical team for a personalized response.
+            </p>
+            <div className="bg-zinc-900 p-4 rounded mb-4 max-h-[300px] overflow-y-auto space-y-2">
+              {consultHistory.length > 0 ? (
+                consultHistory.map((msg) => (
+                  <div key={msg.id} className={`text-sm ${msg.sender === 'admin' ? 'text-green-400' : 'text-blue-300'}`}>
+                    <strong>{msg.sender === 'admin' ? 'Coach:' : 'You:'}</strong> {msg.message}
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-sm">No messages yet.</p>
+              )}
+            </div>
+            <textarea
+              rows="6"
+              className="w-full p-4 bg-zinc-800 text-white border border-zinc-600 rounded mb-4"
+              placeholder="Enter your anabolic-related question or concern..."
+              onChange={(e) => setAnabolicQuestion(e.target.value)}
+              value={anabolicQuestion}
+            />
+            <button
+              onClick={async () => {
+                const res = await fetch('/api/consult/send', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ userId: 'user-123', message: anabolicQuestion })
+                });
+                if (res.ok) {
+                  alert('Message sent to admin. You will receive a response soon.');
+                  setAnabolicQuestion('');
+                } else {
+                  alert('Failed to send your message.');
+                }
+              }}
+              className="bg-orange-600 hover:bg-orange-700 px-6 py-2 rounded font-semibold text-white"
+            >
+              Submit Question
+            </button>
+          </div>
+        );
 
       case 'history':
         return (
@@ -1026,6 +1103,74 @@ export default function Dashboard() {
                 </div>
               ))}
             </div>
+          </div>
+        );
+
+      case 'adminconsult':
+        return (
+          <div className="mt-6 text-white">
+            <h2 className="text-2xl font-bold text-orange-400 mb-4">Anabolic Consultation – Admin View</h2>
+            {allConsults.length === 0 ? (
+              <p className="text-gray-500">No messages available.</p>
+            ) : (
+              (() => {
+                const sortedConsults = [...allConsults].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                const repliedSet = new Set(
+                  allConsults
+                    .filter((m) => m.sender === 'admin')
+                    .map((m) => `${m.userId}:${m.message}`)
+                );
+                return sortedConsults.map((msg) => {
+                  const isUnread = msg.sender === 'user' && !repliedSet.has(`${msg.userId}:${msg.message}`);
+                  return (
+                    <div key={msg.id} className={`bg-zinc-800 p-4 rounded-lg mb-4 ${isUnread ? 'border-l-4 border-yellow-400' : ''}`}>
+                      <p className="text-sm text-gray-400 mb-1"><strong>User:</strong> {msg.userId}</p>
+                      <p className={`text-sm ${msg.sender === 'admin' ? 'text-green-400' : 'text-blue-300'}`}>
+                        <strong>{msg.sender === 'admin' ? 'Coach:' : 'User:'}</strong> {msg.message}
+                      </p>
+                      {msg.sender === 'user' && (
+                        <form
+                          className="mt-2"
+                          onSubmit={async (e) => {
+                            e.preventDefault();
+                            const form = new FormData(e.target);
+                            const reply = form.get('reply');
+                            if (!reply) return;
+                            const res = await fetch('/api/consult/reply', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                userId: msg.userId,
+                                message: reply
+                              })
+                            });
+                            if (res.ok) {
+                              alert('Reply sent.');
+                              e.target.reset();
+                            } else {
+                              alert('Failed to send reply.');
+                            }
+                          }}
+                        >
+                          <input
+                            name="reply"
+                            type="text"
+                            placeholder="Type your reply..."
+                            className="w-full mt-2 p-2 rounded bg-zinc-700 text-white"
+                          />
+                          <button
+                            type="submit"
+                            className="mt-2 bg-green-600 hover:bg-green-700 px-4 py-1 rounded text-white font-semibold"
+                          >
+                            Send Reply
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                  );
+                });
+              })()
+            )}
           </div>
         );
 
@@ -1075,6 +1220,20 @@ export default function Dashboard() {
         >
           AI Coach
         </button>
+      <button
+          className={`pb-2 px-3 font-semibold ${activeTab === 'anabolic' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
+          onClick={() => setActiveTab('anabolic')}
+        >
+          Anabolic Consulting
+        </button>
+      {isAdmin && (
+        <button
+          className={`pb-2 px-3 font-semibold ${activeTab === 'adminconsult' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
+          onClick={() => setActiveTab('adminconsult')}
+        >
+          Admin Consult
+        </button>
+      )}
         <button
           className={`pb-2 px-3 font-semibold ${activeTab === 'history' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
           onClick={() => setActiveTab('history')}
@@ -1085,5 +1244,6 @@ export default function Dashboard() {
 
       {renderTabContent()}
     </div>
-  );
-}
+        );
+        return null;
+      }
