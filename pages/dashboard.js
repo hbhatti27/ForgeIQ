@@ -1229,20 +1229,29 @@ export default function Dashboard() {
         >
           Anabolic Consulting
         </button>
-        {isAdmin && (
+        {isAdmin ? (
+          <>
+            <button
+              className={`pb-2 px-3 font-semibold ${activeTab === 'adminconsult' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
+              onClick={() => setActiveTab('adminconsult')}
+            >
+              Admin Consult
+            </button>
+            <button
+              className={`pb-2 px-3 font-semibold ${activeTab === 'history' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
+              onClick={() => setActiveTab('history')}
+            >
+              Training History
+            </button>
+          </>
+        ) : (
           <button
-            className={`pb-2 px-3 font-semibold ${activeTab === 'adminconsult' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
-            onClick={() => setActiveTab('adminconsult')}
+            className={`pb-2 px-3 font-semibold ${activeTab === 'history' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => setActiveTab('history')}
           >
-            Admin Consult
+            Training History
           </button>
         )}
-        <button
-          className={`pb-2 px-3 font-semibold ${activeTab === 'history' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
-          onClick={() => setActiveTab('history')}
-        >
-          Training History
-        </button>
       </div>
 
       {renderTabContent()}
