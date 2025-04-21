@@ -388,93 +388,94 @@ export default function Dashboard() {
 
       case 'checkins':
         return (
-          <div className="mt-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold text-orange-400">Weekly Check-ins</h2>
-              <button
-                className="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-md font-semibold text-white"
-                onClick={() => router.push('/intake/front-photo')}
-              >
-                + New Check-in
-              </button>
-            </div>
-            <div className="space-y-4">
-              {checkinHistory.length === 0 ? (
-                <p className="text-gray-400">No check-ins yet.</p>
-              ) : (
-                <>
-                  {checkinHistory.length > 1 && (
-                    <div className="bg-zinc-900 p-4 rounded-md shadow-md mb-6">
-                      <h3 className="text-lg font-semibold text-orange-400 mb-2">Progress Overview</h3>
-                      <Line
-                        data={{
-                          labels: checkinHistory.map((entry, i) => `W${checkinHistory.length - i}`),
-                          datasets: [
-                            {
-                              label: 'Body Fat %',
-                              data: checkinHistory.map((c) => parseFloat(c.bodyFat)),
-                              borderColor: '#f87171',
-                              backgroundColor: 'rgba(248, 113, 113, 0.2)',
-                              tension: 0.3
-                            },
-                            {
-                              label: 'Lean Body Mass (lbs)',
-                              data: checkinHistory.map((c) => parseFloat(c.leanBodyMass)),
-                              borderColor: '#34d399',
-                              backgroundColor: 'rgba(52, 211, 153, 0.2)',
-                              tension: 0.3
-                            }
-                          ]
-                        }}
-                        options={{
-                          responsive: true,
-                          plugins: {
-                            legend: { labels: { color: 'white' } }
-                          },
-                          scales: {
-                            x: { ticks: { color: 'white' } },
-                            y: { ticks: { color: 'white' } }
-                          }
-                        }}
-                      />
-                    </div>
-                  )}
-                  {checkinHistory.slice(0, -1).map((entry, index) => (
-                    <div key={index} className="bg-zinc-800 p-4 rounded-md shadow flex flex-col lg:flex-row lg:items-start space-y-4 lg:space-y-0 lg:space-x-6">
-                      <div className="flex space-x-2">
-                        {entry.frontPhotoUrl && (
-                          <Image src={entry.frontPhotoUrl} alt={`Front Check-in ${index}`} width={300} height={300} className="w-1/4 rounded border border-gray-600" />
-                        )}
-                        {entry.sidePhotoUrl && (
-                          <Image src={entry.sidePhotoUrl} alt={`Side Check-in ${index}`} width={300} height={300} className="w-1/4 rounded border border-gray-600" />
-                        )}
-                        {entry.backPhotoUrl && (
-                          <Image src={entry.backPhotoUrl} alt={`Back Check-in ${index}`} width={300} height={300} className="w-1/4 rounded border border-gray-600" />
-                        )}
-                      </div>
-                      <div className="flex-1">
-                        <p className="text-sm text-gray-400 mb-2">{new Date(entry.date).toLocaleDateString()}</p>
-                        <table className="text-sm w-full text-left border-collapse">
-                          <tbody>
-                            <tr>
-                              <td className="pr-4 text-orange-400 font-semibold">Estimated Body Fat %:</td>
-                              <td>{entry.bodyFat}</td>
-                            </tr>
-                            <tr>
-                              <td className="pr-4 text-orange-400 font-semibold">Estimated Lean Body Mass:</td>
-                              <td>{entry.leanBodyMass} lbs</td>
-                            </tr>
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  ))}
-                </>
-              )}
-            </div>
-                </div>
+          <React.Fragment>
+            <div className="mt-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-2xl font-bold text-orange-400">Weekly Check-ins</h2>
+                <button
+                  className="bg-orange-600 hover:bg-orange-700 px-4 py-2 rounded-md font-semibold text-white"
+                  onClick={() => router.push('/intake/front-photo')}
+                >
+                  + New Check-in
+                </button>
               </div>
-            );
+              <div className="space-y-4">
+                {checkinHistory.length === 0 ? (
+                  <p className="text-gray-400">No check-ins yet.</p>
+                ) : (
+                  <>
+                    {checkinHistory.length > 1 && (
+                      <div className="bg-zinc-900 p-4 rounded-md shadow-md mb-6">
+                        <h3 className="text-lg font-semibold text-orange-400 mb-2">Progress Overview</h3>
+                        <Line
+                          data={{
+                            labels: checkinHistory.map((entry, i) => `W${checkinHistory.length - i}`),
+                            datasets: [
+                              {
+                                label: 'Body Fat %',
+                                data: checkinHistory.map((c) => parseFloat(c.bodyFat)),
+                                borderColor: '#f87171',
+                                backgroundColor: 'rgba(248, 113, 113, 0.2)',
+                                tension: 0.3
+                              },
+                              {
+                                label: 'Lean Body Mass (lbs)',
+                                data: checkinHistory.map((c) => parseFloat(c.leanBodyMass)),
+                                borderColor: '#34d399',
+                                backgroundColor: 'rgba(52, 211, 153, 0.2)',
+                                tension: 0.3
+                              }
+                            ]
+                          }}
+                          options={{
+                            responsive: true,
+                            plugins: {
+                              legend: { labels: { color: 'white' } }
+                            },
+                            scales: {
+                              x: { ticks: { color: 'white' } },
+                              y: { ticks: { color: 'white' } }
+                            }
+                          }}
+                        />
+                      </div>
+                    )}
+                    {checkinHistory.slice(0, -1).map((entry, index) => (
+                      <div key={index} className="bg-zinc-800 p-4 rounded-md shadow flex flex-col lg:flex-row lg:items-start space-y-4 lg:space-y-0 lg:space-x-6">
+                        <div className="flex space-x-2">
+                          {entry.frontPhotoUrl && (
+                            <Image src={entry.frontPhotoUrl} alt={`Front Check-in ${index}`} width={300} height={300} className="w-1/4 rounded border border-gray-600" />
+                          )}
+                          {entry.sidePhotoUrl && (
+                            <Image src={entry.sidePhotoUrl} alt={`Side Check-in ${index}`} width={300} height={300} className="w-1/4 rounded border border-gray-600" />
+                          )}
+                          {entry.backPhotoUrl && (
+                            <Image src={entry.backPhotoUrl} alt={`Back Check-in ${index}`} width={300} height={300} className="w-1/4 rounded border border-gray-600" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-400 mb-2">{new Date(entry.date).toLocaleDateString()}</p>
+                          <table className="text-sm w-full text-left border-collapse">
+                            <tbody>
+                              <tr>
+                                <td className="pr-4 text-orange-400 font-semibold">Estimated Body Fat %:</td>
+                                <td>{entry.bodyFat}</td>
+                              </tr>
+                              <tr>
+                                <td className="pr-4 text-orange-400 font-semibold">Estimated Lean Body Mass:</td>
+                                <td>{entry.leanBodyMass} lbs</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    ))}
+                  </>
+                )}
+              </div>
+            </div>
+          </React.Fragment>
+        );
       case 'nutrition':
         return (
           <div className="mt-6 text-gray-300">
