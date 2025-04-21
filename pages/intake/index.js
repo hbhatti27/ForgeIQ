@@ -1,3 +1,6 @@
+import Image from 'next/image';
+import Link from 'next/link';
+
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 
@@ -15,7 +18,7 @@ export default function IntakeStepOne() {
     const inches = 57 + i;
     const feet = Math.floor(inches / 12);
     const remaining = inches % 12;
-    return `${feet}'${remaining}"`;
+    return `${feet}&rsquo;${remaining}"`;
   });
 
   const handleChange = (e) => {
