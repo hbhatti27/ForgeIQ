@@ -1206,11 +1206,11 @@ export default function Dashboard() {
           Nutrition Summary
         </button>
         <button
-  className={`pb-2 px-3 font-semibold ${activeTab === 'mealplan' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
-  onClick={() => setActiveTab('mealplan')}
->
-  Meal Plan
-</button>
+          className={`pb-2 px-3 font-semibold ${activeTab === 'mealplan' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
+          onClick={() => setActiveTab('mealplan')}
+        >
+          Meal Plan
+        </button>
         <button
           className={`pb-2 px-3 font-semibold ${activeTab === 'training' ? 'border-b-2 border-orange-500 text-orange-400' : 'text-gray-400 hover:text-white'}`}
           onClick={() => setActiveTab('training')}
